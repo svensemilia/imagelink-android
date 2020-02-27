@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ImageLink</string>
+    <string name="app_upload_name">ImageUpload</string>
+    <string name="action_settings">Settings</string>
+</resources>
