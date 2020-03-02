@@ -49,15 +49,16 @@ public class ImageRestApi {
         }
     };
 
-    public static void getImages(String album, int pixelWidth, AsyncHttpResponseHandler handler) {
+    public static void getImages(String album, String continueToken, int pixelWidth, AsyncHttpResponseHandler handler) {
         Log.i(TAG, "postImages called");
         String token = "eyJraWQiOiJHbWNqRnB2WFFvbjBTVEdPcEdwRXdYTTBMXC9Nc0tlYmFTQ3REZ3ZZN2hwST0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoicWFBdFJtbnZsTmlYc0hkNGxrTXA2ZyIsInN1YiI6IjVlNmVjYzI3LWI5ZmUtNGI2MC1hMWI4LWI3M2JhMzVlOGYxNSIsImF1ZCI6IjNxbmdhZXFodDYxaWU2amh1dG52NjkxOGU3IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImV2ZW50X2lkIjoiMDBkMWEyOTYtNWY4MS00MWVlLThiZmMtNjhmY2VmN2FiZDgzIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE1ODI3MDUxMzksImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbVwvZXUtY2VudHJhbC0xX3Mwd1UybzN1biIsImNvZ25pdG86dXNlcm5hbWUiOiI1ZTZlY2MyNy1iOWZlLTRiNjAtYTFiOC1iNzNiYTM1ZThmMTUiLCJleHAiOjE1ODI3MDg3MzksImlhdCI6MTU4MjcwNTEzOSwiZW1haWwiOiJzdmVuX2NhcmxpbkBhcmNvci5kZSJ9.SgENx732rN163VzkDUtqKLy2S0TsVHYPQlFAc9SHyEkleoYrnjKpuZefkmWPPWLUrOnpDGb7uYsjyohRWQYZySF6PQAfxxpwmSLFqLgmElJka0jHYnUS8L0X-5uAo3kt_XPClgVOZ_LmSh8xX8_WQwg1yqKXd7os2W1UJYsw8VzzOG5rLRstoLw-VfADC77LIg6MVVbLA6o_MmFCrDiPWeqtZFBgb0N-iJfEKy_Y3Lv3JxsonRTPOOj3PMFlA5a5UYKXcoNEdJi2E7JcA1G6dnLaAd9v_AWjQ0tkpMl1v-w5vylZJxDiqASkqRViG9sOB7bme4e1W6qb4C8aq3RY2g";
 
         RequestParams params = new RequestParams();
         params.put("album", album);
         params.put("resolution", pixelWidth);
+        params.put("continue", continueToken);
         client.addHeader("Authorization", token);
-        client.get(null, "http://54.93.33.97:8080/images", params, handler);
+        client.get(null, "http://18.184.77.161:8080/images", params, handler);
     }
 
     public static void postImages(ContentResolver resolver, List<Uri> imageUris, String album){
@@ -92,7 +93,7 @@ public class ImageRestApi {
         builder.setBoundary("&&");
         HttpEntity ent = builder.build();
 
-        client.post(null, "http://54.93.33.97:8080/androidUpload", headers, ent, "multipart/form-data; boundary=&&", responseHandler);
+        client.post(null, "http://18.184.77.161:8080/androidUpload", headers, ent, "multipart/form-data; boundary=&&", responseHandler);
     }
 
     public static void get(){
