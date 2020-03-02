@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,7 +45,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String continueToken = "";
     private TableLayout table;
     private List<String> base64Images;
+    private List<String> subDirs;
     private int currentResolution;
+    private String currentDir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,28 +67,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         base64Images = new ArrayList<>(10);
-
-        /*
-        String strBase64 = imgBytes; //"data:image/jpeg;base64," +
-        byte[] decodedString = Base64.decode(strBase64, Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-
-        ImageView img = findViewById(R.id.imageView);
-        ImageView img2 = findViewById(R.id.imageView2);
-        ImageView img3 = findViewById(R.id.imageView3);
-        img.setImageBitmap(decodedByte);
-        img2.setImageBitmap(decodedByte);
-        img3.setImageBitmap(decodedByte);
-
-        //getImages();
-        fillTable();
-        */
-
-        getImages();
+        subDirs = new ArrayList<>(5);
+        currentDir = "";
+        getImages(currentDir);
         //addImagesToTable();
     }
 
-    private void getImages() {
+    private void getImages(String album) {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         Log.i("TEST", "Width: " + metrics.widthPixels);
@@ -94,16 +82,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         currentResolution = metrics.widthPixels / IMAGES_NUMBER_PORTRAIT;
         Log.i("TEST", "ImageWidth: " + currentResolution);
 
-        ImageRestApi.getImages("", continueToken, currentResolution, new JsonHttpResponseHandler() {
+        if (album != currentDir){
+            continueToken = "";
+            currentDir = album;
+        }
+        ImageRestApi.getImages(album, continueToken, currentResolution, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 Log.i("TEST", "OnSuccess JsonObj");
                 try {
                     continueToken = response.getString("ContinuationToken");
                     JSONArray images = response.getJSONArray("Images");
+                    JSONArray dirs = response.getJSONArray("Dirs");
                     JSONObject image = null;
                     for (int i=0; i< images.length(); i++){
                         base64Images.add(images.getJSONObject(i).getString("Data"));
+                    }
+                    for (int i=0; i< dirs.length(); i++){
+                        subDirs.add(dirs.getString(i));
                     }
                     addImagesToTable();
                 } catch (JSONException e) {
@@ -128,6 +124,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Bitmap decodedByte;
         TableLayout.LayoutParams rowLayout = new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT);
         TableRow.LayoutParams imageLayout;
+        for(String dir : subDirs) {
+            if (count % IMAGES_NUMBER_PORTRAIT == 0) {
+                if (count != 0) {
+                    newRow = new TableRow(this);
+                }
+                newRow.setLayoutParams(rowLayout);
+                newRow.setPadding(5, 5, 5, 5);
+            }
+
+            TextView img = getDirView(dir, count);
+            newRow.addView(img);
+
+            if ((count % IMAGES_NUMBER_PORTRAIT == 2)) {
+                table.addView(newRow);
+            }
+            count ++;
+        }
         for (String base64 : base64Images) {
             if (count % IMAGES_NUMBER_PORTRAIT == 0) {
                 if (count != 0) {
@@ -137,15 +150,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 newRow.setPadding(5, 5, 5, 5);
             }
 
-            ImageView img = new ImageView(this);
-            img.setPadding(0,3,3,0);
-            imageLayout = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
-            imageLayout.column = count % IMAGES_NUMBER_PORTRAIT;
-            img.setLayoutParams(imageLayout);
-            decodedString = Base64.decode(base64, Base64.DEFAULT);
-            decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            img.setImageBitmap(decodedByte);
-
+            ImageView img = getImageView(base64, count);
             newRow.addView(img);
 
             if ((count % IMAGES_NUMBER_PORTRAIT == 2)) {
@@ -175,6 +180,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private TextView getDirView(String dir, int count) {
+        TextView view = new TextView(this);
+        TableRow.LayoutParams imageLayout = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
+        view.setLayoutParams(imageLayout);
+        view.setText(dir);
+        view.setMinimumWidth(currentResolution);
+        view.setMinimumHeight(currentResolution);
+        view.setOnClickListener(this);
+        return view;
+    }
+
+    private ImageView getImageView(String base64, int count){
+        ImageView img = new ImageView(this);
+        img.setPadding(0,3,3,0);
+        TableRow.LayoutParams imageLayout = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
+        imageLayout.column = count % IMAGES_NUMBER_PORTRAIT;
+        img.setLayoutParams(imageLayout);
+        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        img.setImageBitmap(decodedByte);
+        return img;
+    }
+
     private ImageView getAddImagesIcon(int column) {
         ImageView img = new ImageView(this);
         TableRow.LayoutParams imageLayout = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
@@ -191,7 +219,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         Log.i("TEST", "OnClick");
-        getImages();
+
+        String album = "";
+        if (view instanceof TextView) {
+            album = ((TextView) view).getText().toString();
+        } else {
+            album = currentDir;
+        }
+        getImages(album);
+
     }
 
     @Override
