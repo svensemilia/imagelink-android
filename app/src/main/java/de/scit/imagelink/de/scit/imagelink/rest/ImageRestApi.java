@@ -58,7 +58,7 @@ public class ImageRestApi {
         params.put("resolution", pixelWidth);
         params.put("continue", continueToken);
         client.addHeader("Authorization", token);
-        client.get(null, "http://18.184.77.161:8080/images", params, handler);
+        client.get(null, "http://52.57.113.109:8080/images", params, handler);
     }
 
     public static void postImages(ContentResolver resolver, List<Uri> imageUris, String album){
@@ -93,7 +93,7 @@ public class ImageRestApi {
         builder.setBoundary("&&");
         HttpEntity ent = builder.build();
 
-        client.post(null, "http://18.184.77.161:8080/androidUpload", headers, ent, "multipart/form-data; boundary=&&", responseHandler);
+        client.post(null, "http://52.57.113.109:8080/androidUpload", headers, ent, "multipart/form-data; boundary=&&", responseHandler);
     }
 
     public static void get(){

@@ -16,6 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,15 +58,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         table = findViewById(R.id.img_table);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         base64Images = new ArrayList<>(10);
         subDirs = new ArrayList<>(5);
         currentDir = "";
@@ -83,8 +75,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.i("TEST", "ImageWidth: " + currentResolution);
 
         if (album != currentDir){
+            if (!currentDir.isEmpty()) {
+                album = currentDir + "/" + album;
+            }
             continueToken = "";
             currentDir = album;
+            base64Images.clear();
+            subDirs.clear();
         }
         ImageRestApi.getImages(album, continueToken, currentResolution, new JsonHttpResponseHandler() {
             @Override
@@ -99,7 +96,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         base64Images.add(images.getJSONObject(i).getString("Data"));
                     }
                     for (int i=0; i< dirs.length(); i++){
-                        subDirs.add(dirs.getString(i));
+                        if (!subDirs.contains(dirs.getString(i))) {
+                            subDirs.add(dirs.getString(i));
+                        }
                     }
                     addImagesToTable();
                 } catch (JSONException e) {
@@ -116,7 +115,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addImagesToTable() {
-        table.removeAllViews();
+        if (table.getChildCount() > 1) {
+            table.removeViews(1,table.getChildCount() - 1);
+        }
         Log.i("TEST", "Adding images: " + base64Images.size());
         int count = 0;
         TableRow newRow = new TableRow(this);
@@ -183,10 +184,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView getDirView(String dir, int count) {
         TextView view = new TextView(this);
         TableRow.LayoutParams imageLayout = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
+        imageLayout.column = count % IMAGES_NUMBER_PORTRAIT;
         view.setLayoutParams(imageLayout);
         view.setText(dir);
+        view.setPadding(0,3,3,0);
         view.setMinimumWidth(currentResolution);
         view.setMinimumHeight(currentResolution);
+        view.setBackgroundColor(0xFF499EC5);
+        view.setGravity(Gravity.CENTER);
         view.setOnClickListener(this);
         return view;
     }
