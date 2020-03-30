@@ -18,16 +18,22 @@ import java.io.UnsupportedEncodingException;
 
 import cz.msebera.android.httpclient.Header;
 import de.scit.imagelink.de.scit.imagelink.rest.ImageRestApi;
+import de.scit.imagelink.state.StateListener;
 
 public class StatusActivity extends AppCompatActivity {
 
-    private boolean isServerRunning;
-    private boolean isApiOnline;
+    private StateListener stateListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_status);
+
+        View serverButton = findViewById(R.id.button);
+        View apiButton = findViewById(R.id.button2);
+        Switch switchV = findViewById(R.id.switch1);
+
+        stateListener = new StateListener(this, serverButton, apiButton, switchV);
 
         //check server status ...
         checkServer();
@@ -44,9 +50,9 @@ public class StatusActivity extends AppCompatActivity {
                     int stateCode = state.getInt("Code");
 
                     if (stateCode == 16) {
-                        isServerRunning = true;
+                        stateListener.setServerRunning(true);
                     } else {
-                        isServerRunning = false;
+                        stateListener.setServerRunning(false);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
