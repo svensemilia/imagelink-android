@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import de.scit.imagelink.R;
 
@@ -14,16 +15,18 @@ public class StateListener {
     private View serverButton;
     private View apiButton;
     private Switch switchView;
+    private TextView tv;
     private Context ctx;
 
-    public StateListener(Context ctx, View serverButton, View apiButton, Switch switchV) {
+    public StateListener(Context ctx, View serverButton, View apiButton, Switch switchV, TextView tv) {
         this.serverButton = serverButton;
         this.apiButton = apiButton;
         this.switchView = switchV;
+        this.tv = tv;
         this.ctx = ctx;
     }
 
-    public void setServerRunning(boolean isServerRunning) {
+    public void setServerRunning(boolean isServerRunning, String ip) {
         if (this.isServerRunning != isServerRunning) {
             refreshServerButton(isServerRunning);
         }
@@ -35,6 +38,12 @@ public class StateListener {
 
         if (isServerRunning != switchView.isChecked()) {
             switchView.setChecked(!switchView.isChecked());
+        }
+
+        if (isServerRunning && ip != null) {
+            tv.setText(ip);
+        } else {
+            tv.setText("-");
         }
     }
 

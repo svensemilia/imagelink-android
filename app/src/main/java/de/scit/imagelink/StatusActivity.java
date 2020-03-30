@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -32,8 +33,9 @@ public class StatusActivity extends AppCompatActivity {
         View serverButton = findViewById(R.id.button);
         View apiButton = findViewById(R.id.button2);
         Switch switchV = findViewById(R.id.switch1);
+        TextView tv = findViewById(R.id.ip);
 
-        stateListener = new StateListener(this, serverButton, apiButton, switchV);
+        stateListener = new StateListener(this, serverButton, apiButton, switchV, tv);
 
         //check server status ...
         checkServer(null);
@@ -48,11 +50,15 @@ public class StatusActivity extends AppCompatActivity {
                 try {
                     JSONObject state = response.getJSONObject("state");
                     int stateCode = state.getInt("Code");
+                    String ip = null;
+                    if (!response.isNull("ip")) {
+                        ip = response.getString("ip");
+                    }
 
                     if (stateCode == 16) {
-                        stateListener.setServerRunning(true);
+                        stateListener.setServerRunning(true, ip);
                     } else {
-                        stateListener.setServerRunning(false);
+                        stateListener.setServerRunning(false, null);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
