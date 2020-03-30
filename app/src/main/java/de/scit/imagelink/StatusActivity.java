@@ -36,10 +36,10 @@ public class StatusActivity extends AppCompatActivity {
         stateListener = new StateListener(this, serverButton, apiButton, switchV);
 
         //check server status ...
-        checkServer();
+        checkServer(null);
     }
 
-    private void checkServer() {
+    public void checkServer(View v) {
         ImageRestApi.getServerState(new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
