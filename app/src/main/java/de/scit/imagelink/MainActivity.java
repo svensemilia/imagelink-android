@@ -1,5 +1,6 @@
 package de.scit.imagelink;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -25,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -110,6 +112,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
                 // Pull out the first event on the public timeline
                 Log.i("TEST", "OnSuccess JsonArray");
+            }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
+                if (response != null) {
+                    Log.i("TEST", response.toString());
+                }
+                Toast toast = Toast.makeText(MainActivity.this, "Content could not be loaded", Toast.LENGTH_SHORT);
+                toast.show();
+                //Snackbar.make(, "Content could not be loaded", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
     }
@@ -251,6 +262,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        } else if (id == R.id.action_status) {
+            Intent statusInt = new Intent(this, StatusActivity.class);
+            startActivity(statusInt);
             return true;
         }
 
