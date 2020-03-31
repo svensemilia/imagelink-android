@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 
 import cz.msebera.android.httpclient.Header;
+import de.scit.imagelink.common.DefaultResponseHandler;
 import de.scit.imagelink.de.scit.imagelink.rest.ImageRestApi;
 import de.scit.imagelink.state.StateListener;
 
@@ -116,17 +117,5 @@ public class StatusActivity extends AppCompatActivity {
         }
     };
 
-    AsyncHttpResponseHandler serverStartStopHandler = new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Log.i("TEST", "OnSuccess JsonObj");
-                Log.i("TEST", response.toString());
-            }
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
-                if (response != null) {
-                    Log.i("TEST", response.toString());
-                }
-            }
-    };
+    AsyncHttpResponseHandler serverStartStopHandler = new DefaultResponseHandler();
 }
