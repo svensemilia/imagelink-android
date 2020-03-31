@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -57,8 +58,10 @@ public class StatusActivity extends AppCompatActivity {
 
                     if (stateCode == 16) {
                         stateListener.setServerRunning(true, ip);
+                        checkAPI();
                     } else {
                         stateListener.setServerRunning(false, null);
+                        stateListener.setApiOnline(false);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -68,7 +71,23 @@ public class StatusActivity extends AppCompatActivity {
     }
 
     private void checkAPI() {
-
+        try {
+            ImageRestApi.getAPIHealth(new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    Log.i("TEST", "OnSuccess JsonObj");
+                    Log.i("TEST", response.toString());
+                    if (statusCode == 200) {
+                        stateListener.setApiOnline(true);
+                    } else {
+                        stateListener.setApiOnline(false);
+                    }
+                }
+            });
+        } catch (IllegalStateException e) {
+            Toast toast = Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
 
     public void startStopServer(View view) {

@@ -7,6 +7,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import de.scit.imagelink.R;
+import de.scit.imagelink.de.scit.imagelink.rest.ImageRestApi;
 
 public class StateListener {
 
@@ -42,8 +43,10 @@ public class StateListener {
 
         if (isServerRunning && ip != null) {
             tv.setText(ip);
+            ImageRestApi.setServerIP(ip);
         } else {
             tv.setText("-");
+            ImageRestApi.setServerIP(null);
         }
     }
 

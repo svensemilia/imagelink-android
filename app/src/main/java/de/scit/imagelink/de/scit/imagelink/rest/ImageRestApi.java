@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
@@ -36,9 +37,11 @@ public class ImageRestApi {
     private static final String API_GATEWAY = "https://4h6bxpz6e3.execute-api.eu-central-1.amazonaws.com/Dev";
     private static final String API_SERVER_STATUS = "/server/status";
     private static final String API_SERVER_ACTION = "/server/action";
+    private static final String API_HEALTH_CHECK = "/healthcheck";
+    private static String API_SERVER_IP = null;
 
     @Deprecated
-    private static final String token = "eyJraWQiOiJHbWNqRnB2WFFvbjBTVEdPcEdwRXdYTTBMXC9Nc0tlYmFTQ3REZ3ZZN2hwST0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiLUgzVVMtTjdEUC1aM25yLWp1ZS1hQSIsInN1YiI6IjVlNmVjYzI3LWI5ZmUtNGI2MC1hMWI4LWI3M2JhMzVlOGYxNSIsImF1ZCI6IjNxbmdhZXFodDYxaWU2amh1dG52NjkxOGU3IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImV2ZW50X2lkIjoiY2ZiOTBiNWMtZGEwMS00NDI5LTg2NzMtMDUwZjYxNzhhNzQzIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE1ODU1OTE4MDAsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbVwvZXUtY2VudHJhbC0xX3Mwd1UybzN1biIsImNvZ25pdG86dXNlcm5hbWUiOiI1ZTZlY2MyNy1iOWZlLTRiNjAtYTFiOC1iNzNiYTM1ZThmMTUiLCJleHAiOjE1ODU1OTU0MDAsImlhdCI6MTU4NTU5MTgwMCwiZW1haWwiOiJzdmVuX2NhcmxpbkBhcmNvci5kZSJ9.WG9K-_WfiJLWGZGvJcLimbib5Ck6N9TO8lV6uUD9LZFdYBdUUnjP5fTuOcVI2MbBFJh0Cal0CFFhk9h89r0ctnuYqrP6WVOp0fucItYRUMlqQVA_f4m1WnyQga9YNJ0eviLOZMQkveCkTZmk4H6iTZuvOuXhXDsiTIJNGyMXjGod2Nr3lYMCG4nDo8Jsih2zktrT6Sl5AA4xflGZJV6mIAhNTDzpa1hEl6GEsOOLxUHxbcJnctFszDgGNH0VyvwqwwukmiNYVffzvI9o05giQxo0LTvueDzJCAbR26vK3rDuWs0676tifwOGXCkRZ2KQdPdcqzXZlUPhDt955FGfNw";
+    private static final String token = "eyJraWQiOiJHbWNqRnB2WFFvbjBTVEdPcEdwRXdYTTBMXC9Nc0tlYmFTQ3REZ3ZZN2hwST0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiUUItM2NXUl81a0VnYVV3bU5Vc1owdyIsInN1YiI6IjVlNmVjYzI3LWI5ZmUtNGI2MC1hMWI4LWI3M2JhMzVlOGYxNSIsImF1ZCI6IjNxbmdhZXFodDYxaWU2amh1dG52NjkxOGU3IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImV2ZW50X2lkIjoiMGVmZmRjNDgtOWZiYy00N2FiLWE0MjItZmE3MjczZWM2MWJiIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE1ODU2NDcxMDcsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbVwvZXUtY2VudHJhbC0xX3Mwd1UybzN1biIsImNvZ25pdG86dXNlcm5hbWUiOiI1ZTZlY2MyNy1iOWZlLTRiNjAtYTFiOC1iNzNiYTM1ZThmMTUiLCJleHAiOjE1ODU2NTA3MDcsImlhdCI6MTU4NTY0NzEwNywiZW1haWwiOiJzdmVuX2NhcmxpbkBhcmNvci5kZSJ9.uWKkSO0ynSzxQ_y6TX59MDvlt4uCE3ceCDZo7pZdBYuzzc7CrJKfaL3kwH2qDRaQyMBPP84qJ9TU2b4WgJhRBmQbmJ3utCxXy-bhdSVsk59bax2tCM-O2E10qO1CvnuHzbzVLhBjZDF7p8cA-sZ0d6_znwQdDEXzGIgQImg7zvJRM0LkpplhrcF3Ruktdx66VQH1g0auIJRVgMs9DZhUvSEQhzlQl3hO-nK6PLiTURP6V2phdAGFAYSOA2OSTjUyn_8UC3hPhXHNAgXXzn7bFBCFkZIHbS3NhSFYuyn2P-NZiIEnc40cWief5GTQrHxxxjzJyssdYyZ2h9USUT2dyA";
 
     private static final AsyncHttpResponseHandler responseHandler = new AsyncHttpResponseHandler() {
         @Override
@@ -65,6 +68,14 @@ public class ImageRestApi {
             Log.i(TAG, "Percentage " + (bytesWritten / totalSize));
         }
     };
+
+    public static String getServerIP() {
+        return API_SERVER_IP;
+    }
+
+    public static void setServerIP(String ip) {
+        API_SERVER_IP = ip;
+    }
 
     public static void getImages(String album, String continueToken, int pixelWidth, AsyncHttpResponseHandler handler) {
         Log.i(TAG, "getImages called");
@@ -162,5 +173,26 @@ public class ImageRestApi {
             }
         }
         return result;
+    }
+
+    public static void getAPIHealth(AsyncHttpResponseHandler handler) throws IllegalStateException {
+        if (API_SERVER_IP == null || API_SERVER_IP.isEmpty()) {
+            throw new IllegalStateException("Unknown Server IP");
+        }
+        Log.i(TAG, "health check called");
+
+        RequestParams params = new RequestParams();
+        client.addHeader("Authorization", token);
+        String endpoint = constructEndpoint(API_SERVER_IP, API_HEALTH_CHECK);
+        client.get(null, endpoint, params, handler);
+    }
+
+    private static String constructEndpoint(String ip, String resource) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("http://");
+        sb.append(API_SERVER_IP);
+        sb.append(":8080");
+        sb.append(resource);
+        return sb.toString();
     }
 }
