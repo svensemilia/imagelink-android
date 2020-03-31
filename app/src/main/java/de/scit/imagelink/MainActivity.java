@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             base64Images.clear();
             subDirs.clear();
         }
+        try {
         ImageRestApi.getImages(album, continueToken, currentResolution, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -123,6 +124,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //Snackbar.make(, "Content could not be loaded", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
+        } catch (IllegalStateException e) {
+            Toast toast = Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
 
     private void addImagesToTable() {

@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
@@ -16,28 +15,27 @@ import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.NameValuePair;
-import cz.msebera.android.httpclient.client.entity.UrlEncodedFormEntity;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 import cz.msebera.android.httpclient.entity.mime.HttpMultipartMode;
 import cz.msebera.android.httpclient.entity.mime.MultipartEntityBuilder;
 import cz.msebera.android.httpclient.message.BasicHeader;
-import cz.msebera.android.httpclient.message.BasicNameValuePair;
 import cz.msebera.android.httpclient.protocol.HTTP;
 
 public class ImageRestApi {
     private static AsyncHttpClient client = new AsyncHttpClient();
     private static final String TAG = "ImageRestApi";
     private static final String API_GATEWAY = "https://4h6bxpz6e3.execute-api.eu-central-1.amazonaws.com/Dev";
-    private static final String API_SERVER_STATUS = "/server/status";
-    private static final String API_SERVER_ACTION = "/server/action";
-    private static final String API_HEALTH_CHECK = "/healthcheck";
+    private static final String API_LAMBDA_STATUS = "/server/status";
+    private static final String API_LAMBDA_ACTION = "/server/action";
+    private static final String API_SERVER_HEALTH_CHECK = "/healthcheck";
+    private static final String API_SERVER_IMAGES = "/images";
+    private static final String API_SERVER_POST_IMAGE = "/androidUpload";
+
     private static String API_SERVER_IP = null;
 
     @Deprecated
@@ -77,7 +75,11 @@ public class ImageRestApi {
         API_SERVER_IP = ip;
     }
 
-    public static void getImages(String album, String continueToken, int pixelWidth, AsyncHttpResponseHandler handler) {
+    public static void getImages(String album, String continueToken, int pixelWidth, AsyncHttpResponseHandler handler) throws IllegalStateException {
+        if (API_SERVER_IP == null || API_SERVER_IP.isEmpty()) {
+            throw new IllegalStateException("Unknown Server IP");
+        }
+
         Log.i(TAG, "getImages called");
 
         RequestParams params = new RequestParams();
@@ -85,7 +87,8 @@ public class ImageRestApi {
         params.put("resolution", pixelWidth);
         params.put("continue", continueToken);
         client.addHeader("Authorization", token);
-        client.get(null, "http://52.57.113.109:8080/images", params, handler);
+        String endpoint = constructEndpoint(API_SERVER_IP, API_SERVER_IMAGES);
+        client.get(null, endpoint, params, handler);
     }
 
     public static void getServerState(AsyncHttpResponseHandler handler) {
@@ -93,7 +96,7 @@ public class ImageRestApi {
 
         RequestParams params = new RequestParams();
         client.addHeader("Authorization", token);
-        String endpoint = API_GATEWAY.concat(API_SERVER_STATUS);
+        String endpoint = API_GATEWAY.concat(API_LAMBDA_STATUS);
         client.get(null, endpoint, params, handler);
     }
 
@@ -104,18 +107,19 @@ public class ImageRestApi {
         headers[0] = new BasicHeader("Content-Type", "application/json");
         headers[1] = new BasicHeader("Authorization", token);
 
-        String endpoint = API_GATEWAY.concat(API_SERVER_ACTION);
+        String endpoint = API_GATEWAY.concat(API_LAMBDA_ACTION);
         JSONObject jsonobj = new JSONObject();
         jsonobj.put("action", action);
         StringEntity ent = new StringEntity( jsonobj.toString());
         ent.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-        //List<NameValuePair> nameValuePairs = new ArrayList<>();
-        //nameValuePairs.add(new BasicNameValuePair("action", action));
-        //UrlEncodedFormEntity ent = new UrlEncodedFormEntity(nameValuePairs);
         client.post(null, endpoint, headers, ent, "application/json", handler);
     }
 
-    public static void postImages(ContentResolver resolver, List<Uri> imageUris, String album){
+    public static void postImages(ContentResolver resolver, List<Uri> imageUris, String album) throws IllegalStateException {
+        if (API_SERVER_IP == null || API_SERVER_IP.isEmpty()) {
+            throw new IllegalStateException("Unknown Server IP");
+        }
+
         if(imageUris == null || imageUris.size() == 0){
             return;
         }
@@ -146,7 +150,8 @@ public class ImageRestApi {
         builder.setBoundary("&&");
         HttpEntity ent = builder.build();
 
-        client.post(null, "http://52.57.113.109:8080/androidUpload", headers, ent, "multipart/form-data; boundary=&&", responseHandler);
+        String endpoint = constructEndpoint(API_SERVER_IP, API_SERVER_POST_IMAGE);
+        client.post(null, endpoint, headers, ent, "multipart/form-data; boundary=&&", responseHandler);
     }
 
     public static void get(){
@@ -183,7 +188,7 @@ public class ImageRestApi {
 
         RequestParams params = new RequestParams();
         client.addHeader("Authorization", token);
-        String endpoint = constructEndpoint(API_SERVER_IP, API_HEALTH_CHECK);
+        String endpoint = constructEndpoint(API_SERVER_IP, API_SERVER_HEALTH_CHECK);
         client.get(null, endpoint, params, handler);
     }
 

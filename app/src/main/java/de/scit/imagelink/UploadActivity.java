@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -41,7 +42,12 @@ public class UploadActivity extends AppCompatActivity {
                 Log.i(TAG, "OnClick triggered");
                 //ImageRestApi.get();
                 String album = editView.getText().toString();
+                try {
                 ImageRestApi.postImages(getContentResolver(), imageUris, album);
+                } catch (IllegalStateException e) {
+                    Toast toast = Toast.makeText(UploadActivity.this, e.getMessage(), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
                 //Environment.getE
                 Log.i(TAG, MediaStore.Images.Media.EXTERNAL_CONTENT_URI.getPath());
 

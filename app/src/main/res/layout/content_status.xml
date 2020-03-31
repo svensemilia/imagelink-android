@@ -57,6 +57,7 @@
         app:layout_constraintTop_toTopOf="@id/apiState"
         app:layout_constraintBottom_toBottomOf="@id/apiState" />
 
+    <!--
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyle"
@@ -67,6 +68,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:indeterminate="true"/>
+    -->
 
     <TextView
         android:id="@+id/textView"
@@ -76,7 +78,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="20dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/progressBar"/>
+        app:layout_constraintTop_toBottomOf="@id/apiState"/>
 
     <TextView
         android:id="@+id/ip"
@@ -86,7 +88,7 @@
         android:layout_marginLeft="3dp"
         android:layout_marginTop="20dp"
         app:layout_constraintLeft_toRightOf="@id/textView"
-        app:layout_constraintTop_toBottomOf="@id/progressBar" />
+        app:layout_constraintTop_toBottomOf="@id/apiState" />
 
     <Button
         android:id="@+id/button3"
