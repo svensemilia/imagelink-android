@@ -1,7 +1,6 @@
 package de.scit.imagelink;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -10,9 +9,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,52 +37,16 @@ public class StatusActivity extends AppCompatActivity {
 
         stateListener = new StateListener(this, serverButton, apiButton, switchV, tv);
 
-        //check server status ...
         checkServer(null);
     }
 
     public void checkServer(View v) {
-        ImageRestApi.getServerState(new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Log.i("TEST", "OnSuccess JsonObj");
-                Log.i("TEST", response.toString());
-                try {
-                    JSONObject state = response.getJSONObject("state");
-                    int stateCode = state.getInt("Code");
-                    String ip = null;
-                    if (!response.isNull("ip")) {
-                        ip = response.getString("ip");
-                    }
-
-                    if (stateCode == 16) {
-                        stateListener.setServerRunning(true, ip);
-                        checkAPI();
-                    } else {
-                        stateListener.setServerRunning(false, null);
-                        stateListener.setApiOnline(false);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        ImageRestApi.getServerState(serverStateHandler);
     }
 
     private void checkAPI() {
         try {
-            ImageRestApi.getAPIHealth(new JsonHttpResponseHandler() {
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    Log.i("TEST", "OnSuccess JsonObj");
-                    Log.i("TEST", response.toString());
-                    if (statusCode == 200) {
-                        stateListener.setApiOnline(true);
-                    } else {
-                        stateListener.setApiOnline(false);
-                    }
-                }
-            });
+            ImageRestApi.getAPIHealth(apiHealthHandler);
         } catch (IllegalStateException e) {
             Toast toast = Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT);
             toast.show();
@@ -99,17 +62,7 @@ public class StatusActivity extends AppCompatActivity {
             //start server
             Log.i("Status", "start server");
             try {
-                ImageRestApi.postServerState("start", new JsonHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        Log.i("TEST", "OnSuccess JsonObj");
-                        Log.i("TEST", response.toString());
-                    }
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
-                        Log.i("TEST", response.toString());
-                    }
-                });
+                ImageRestApi.postServerState("start", serverStartStopHandler);
             } catch (JSONException | UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -117,20 +70,63 @@ public class StatusActivity extends AppCompatActivity {
             //stop server
             Log.i("Status", "stop server");
             try {
-                ImageRestApi.postServerState("stop", new JsonHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        Log.i("TEST", "OnSuccess JsonObj");
-                        Log.i("TEST", response.toString());
-                    }
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
-                        Log.i("TEST", response.toString());
-                    }
-                });
+                ImageRestApi.postServerState("stop", serverStartStopHandler);
             } catch (JSONException | UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         }
     }
+
+    AsyncHttpResponseHandler serverStateHandler = new JsonHttpResponseHandler() {
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            Log.i("TEST", "OnSuccess JsonObj");
+            Log.i("TEST", response.toString());
+            try {
+                JSONObject state = response.getJSONObject("state");
+                int stateCode = state.getInt("Code");
+                String ip = null;
+                if (!response.isNull("ip")) {
+                    ip = response.getString("ip");
+                }
+
+                if (stateCode == 16) {
+                    stateListener.setServerRunning(true, ip);
+                    checkAPI();
+                } else {
+                    stateListener.setServerRunning(false, null);
+                    stateListener.setApiOnline(false);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    AsyncHttpResponseHandler apiHealthHandler = new JsonHttpResponseHandler() {
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            Log.i("TEST", "OnSuccess JsonObj");
+            Log.i("TEST", response.toString());
+            if (statusCode == 200) {
+                stateListener.setApiOnline(true);
+            } else {
+                stateListener.setApiOnline(false);
+            }
+        }
+    };
+
+    AsyncHttpResponseHandler serverStartStopHandler = new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                Log.i("TEST", "OnSuccess JsonObj");
+                Log.i("TEST", response.toString());
+            }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
+                if (response != null) {
+                    Log.i("TEST", response.toString());
+                }
+            }
+    };
 }

@@ -86,44 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             subDirs.clear();
         }
         try {
-        ImageRestApi.getImages(album, continueToken, currentResolution, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Log.i("TEST", "OnSuccess JsonObj");
-                try {
-                    continueToken = response.getString("ContinuationToken");
-                    JSONArray images = response.getJSONArray("Images");
-                    JSONArray dirs = response.getJSONArray("Dirs");
-                    JSONObject image = null;
-                    for (int i=0; i< images.length(); i++){
-                        base64Images.add(images.getJSONObject(i).getString("Data"));
-                    }
-                    for (int i=0; i< dirs.length(); i++){
-                        if (!subDirs.contains(dirs.getString(i))) {
-                            subDirs.add(dirs.getString(i));
-                        }
-                    }
-                    addImagesToTable();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
-                // Pull out the first event on the public timeline
-                Log.i("TEST", "OnSuccess JsonArray");
-            }
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
-                if (response != null) {
-                    Log.i("TEST", response.toString());
-                }
-                Toast toast = Toast.makeText(MainActivity.this, "Content could not be loaded", Toast.LENGTH_SHORT);
-                toast.show();
-                //Snackbar.make(, "Content could not be loaded", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-            }
-        });
+        ImageRestApi.getImages(album, continueToken, currentResolution, imageLoadHandler);
         } catch (IllegalStateException e) {
             Toast toast = Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT);
             toast.show();
@@ -276,4 +239,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         return super.onOptionsItemSelected(item);
     }
+
+    private AsyncHttpResponseHandler imageLoadHandler = new JsonHttpResponseHandler() {
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            Log.i("TEST", "OnSuccess JsonObj");
+            try {
+                continueToken = response.getString("ContinuationToken");
+                JSONArray images = response.getJSONArray("Images");
+                JSONArray dirs = response.getJSONArray("Dirs");
+                JSONObject image = null;
+                for (int i=0; i< images.length(); i++){
+                    base64Images.add(images.getJSONObject(i).getString("Data"));
+                }
+                for (int i=0; i< dirs.length(); i++){
+                    if (!subDirs.contains(dirs.getString(i))) {
+                        subDirs.add(dirs.getString(i));
+                    }
+                }
+                addImagesToTable();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
+            if (response != null) {
+                Log.i("TEST", response.toString());
+            }
+            Toast toast = Toast.makeText(MainActivity.this, "Content could not be loaded", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    };
 }
