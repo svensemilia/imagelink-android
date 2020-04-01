@@ -19,7 +19,7 @@ import java.io.UnsupportedEncodingException;
 
 import cz.msebera.android.httpclient.Header;
 import de.scit.imagelink.common.DefaultResponseHandler;
-import de.scit.imagelink.de.scit.imagelink.rest.ImageRestApi;
+import de.scit.imagelink.rest.ImageRestApi;
 import de.scit.imagelink.state.StateListener;
 
 public class StatusActivity extends AppCompatActivity {

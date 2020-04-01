@@ -7,7 +7,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import de.scit.imagelink.R;
-import de.scit.imagelink.de.scit.imagelink.rest.ImageRestApi;
+import de.scit.imagelink.rest.ImageRestApi;
 
 public class StateListener {
 

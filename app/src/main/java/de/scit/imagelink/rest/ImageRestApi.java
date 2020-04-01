@@ -1,4 +1,4 @@
-package de.scit.imagelink.de.scit.imagelink.rest;
+package de.scit.imagelink.rest;
 
 import android.content.ContentResolver;
 import android.database.Cursor;

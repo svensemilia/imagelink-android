@@ -17,7 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.scit.imagelink.de.scit.imagelink.rest.ImageRestApi;
+import de.scit.imagelink.rest.ImageRestApi;
 
 
 public class UploadActivity extends AppCompatActivity {
