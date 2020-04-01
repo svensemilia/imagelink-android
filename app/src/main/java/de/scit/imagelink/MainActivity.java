@@ -306,8 +306,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (requestCode) {
             case 1:
                 //sign in
-                String user = data.getStringExtra("user");
-                String pwd = data.getStringExtra("pwd");
+                String user = data.getStringExtra(SignInActivity.EXTRA_INPUT_USER);
+                String pwd = data.getStringExtra(SignInActivity.EXTRA_INPUT_PWD);
                 CognitoSignIn.continueSignIn(user, pwd);
                 break;
             default:

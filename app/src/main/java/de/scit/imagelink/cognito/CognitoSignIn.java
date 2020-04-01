@@ -57,21 +57,17 @@ public class CognitoSignIn {
         continuation.continueTask();
     }
 
-    private static void notifySuccessToListeners() {
+    private static void notifyListeners(boolean success) {
         if (signInListeners == null) {
             return;
         }
         for (SignInListener listener : signInListeners) {
-            listener.onSignInSuccess();
-        }
-    }
+            if (success) {
+                listener.onSignInSuccess();
+            } else {
+                listener.onSignInFailure();
+            }
 
-    private static void notifyFailureToListeners() {
-        if (signInListeners == null) {
-            return;
-        }
-        for (SignInListener listener : signInListeners) {
-            listener.onSignInFailure();
         }
     }
 
@@ -80,17 +76,19 @@ public class CognitoSignIn {
         public void onSuccess(CognitoUserSession cognitoUserSession, CognitoDevice device) {
             Log.d(TAG, " -- Auth Success");
             AppHelper.setCurrSession(cognitoUserSession);
-            //launchUser();
-            notifySuccessToListeners();
+            notifyListeners(true);
         }
 
         @Override
         public void getAuthenticationDetails(AuthenticationContinuation continuation, String username) {
             Log.i(TAG, "Auth details");
-            //send username username
+
             CognitoSignIn.continuation = continuation;
             Intent intent=new Intent(activityCtx, SignInActivity.class);
-            activityCtx.startActivityForResult(intent, CODE_SIGN_IN_REQUEST);// Activity is started with requestCode 2
+            if (username != null) {
+                intent.putExtra(SignInActivity.EXTRA_INPUT_USER, username);
+            }
+            activityCtx.startActivityForResult(intent, CODE_SIGN_IN_REQUEST);
         }
 
         @Override
@@ -101,7 +99,7 @@ public class CognitoSignIn {
         @Override
         public void onFailure(Exception e) {
             Log.i(TAG, "Sign in failed");
-            notifyFailureToListeners();
+            notifyListeners(false);
         }
 
         @Override
