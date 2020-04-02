@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         CognitoSignIn.init(this);
         CognitoSignIn.registerListener(this);
         CognitoSignIn.signInLastUser();
+        ImageRestApi.init(this);
 
         //wait for authentication
         //getImages(currentDir);
@@ -292,6 +293,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
             if (response != null) {
+                Log.i("TEST","Hello");
                 Log.i("TEST", response.toString());
             }
             Toast toast = Toast.makeText(MainActivity.this, "Content could not be loaded", Toast.LENGTH_SHORT);

@@ -19,6 +19,7 @@ public class DefaultResponseHandler extends JsonHttpResponseHandler {
     @Override
     public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
         if (response != null) {
+            Log.i("TEST","Hello Hello");
             Log.i("TEST", response.toString());
         }
     }

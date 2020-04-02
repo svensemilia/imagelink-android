@@ -1,6 +1,7 @@
 package de.scit.imagelink.cognito;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
@@ -58,9 +59,11 @@ public class AppHelper {
         }
 
         if (!currSession.isValid()) {
+            Log.i(TAG, "Current session is not valid");
             //refresh session if neccessary
             //CognitoRefreshToken refresh = currSession.getRefreshToken();
         }
+        Log.i(TAG, currSession.getIdToken().getJWTToken());
         return currSession.getIdToken().getJWTToken();
     }
 }
