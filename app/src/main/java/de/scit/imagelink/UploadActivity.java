@@ -50,20 +50,14 @@ public class UploadActivity extends AppCompatActivity {
                 }
                 //Environment.getE
                 Log.i(TAG, MediaStore.Images.Media.EXTERNAL_CONTENT_URI.getPath());
-
-                //try {
-                //    getContentResolver().openInputStream(imageUris.get(0));
-                //} catch (FileNotFoundException e) {
-                //    e.printStackTrace();
-                //}
-                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                //        .setAction("Action", null).show();
             }
         });
 
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
+
+        Log.i(TAG, "Action: " + action + "; Type: " + type);
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if (type.startsWith("image/")) {
