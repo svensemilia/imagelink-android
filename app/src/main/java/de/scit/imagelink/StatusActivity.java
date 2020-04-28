@@ -115,6 +115,11 @@ public class StatusActivity extends AppCompatActivity {
                 stateListener.setApiOnline(false);
             }
         }
+        @Override
+        public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
+            Log.i("TEST", "OnFailure");
+            stateListener.setApiOnline(false);
+        }
     };
 
     AsyncHttpResponseHandler serverStartStopHandler = new DefaultResponseHandler();

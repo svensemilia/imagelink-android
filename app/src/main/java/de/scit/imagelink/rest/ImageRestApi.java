@@ -38,7 +38,8 @@ public class ImageRestApi {
     private static final String API_LAMBDA_ACTION = "/server/action";
     private static final String API_SERVER_HEALTH_CHECK = "/healthcheck";
     private static final String API_SERVER_IMAGES = "/images";
-    private static final String API_SERVER_POST_IMAGE = "/androidUpload";
+    private static final String API_SERVER_IMAGE = "/image";
+    private static final String API_SERVER_POST_IMAGE = "/upload";
 
     private static String API_SERVER_IP = null;
 
@@ -71,8 +72,22 @@ public class ImageRestApi {
         params.put("album", album);
         params.put("resolution", pixelWidth);
         params.put("continue", continueToken);
-        Header[] headers = getHeaders(null, true);
+        Header[] headers = getHeaders(null, false);
         String endpoint = constructEndpoint(API_SERVER_IP, API_SERVER_IMAGES);
+        client.get(null, endpoint, headers, params, handler);
+    }
+
+    public static void getImage(String imageKey, AsyncHttpResponseHandler handler) throws IllegalStateException {
+        if (API_SERVER_IP == null || API_SERVER_IP.isEmpty()) {
+            throw new IllegalStateException("Unknown Server IP");
+        }
+
+        RequestParams params = new RequestParams();
+        String keySuffix = imageKey.substring(imageKey.lastIndexOf("/") + 1);
+        params.put("key", keySuffix); //TODO fix that
+        Log.i(TAG, "getImage called " + keySuffix);
+        Header[] headers = getHeaders(null, false);
+        String endpoint = constructEndpoint(API_SERVER_IP, API_SERVER_IMAGE);
         client.get(null, endpoint, headers, params, handler);
     }
 
