@@ -47,9 +47,6 @@ public class ImageRestApi {
         API_SERVER_IP = Preferences.getStringPreference(ctx, Preferences.PREFERENCE_SERVER_IP, null);
     }
 
-    @Deprecated
-    private static final String token = "eyJraWQiOiJHbWNqRnB2WFFvbjBTVEdPcEdwRXdYTTBMXC9Nc0tlYmFTQ3REZ3ZZN2hwST0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiUUItM2NXUl81a0VnYVV3bU5Vc1owdyIsInN1YiI6IjVlNmVjYzI3LWI5ZmUtNGI2MC1hMWI4LWI3M2JhMzVlOGYxNSIsImF1ZCI6IjNxbmdhZXFodDYxaWU2amh1dG52NjkxOGU3IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImV2ZW50X2lkIjoiMGVmZmRjNDgtOWZiYy00N2FiLWE0MjItZmE3MjczZWM2MWJiIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE1ODU2NDcxMDcsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC5ldS1jZW50cmFsLTEuYW1hem9uYXdzLmNvbVwvZXUtY2VudHJhbC0xX3Mwd1UybzN1biIsImNvZ25pdG86dXNlcm5hbWUiOiI1ZTZlY2MyNy1iOWZlLTRiNjAtYTFiOC1iNzNiYTM1ZThmMTUiLCJleHAiOjE1ODU2NTA3MDcsImlhdCI6MTU4NTY0NzEwNywiZW1haWwiOiJzdmVuX2NhcmxpbkBhcmNvci5kZSJ9.uWKkSO0ynSzxQ_y6TX59MDvlt4uCE3ceCDZo7pZdBYuzzc7CrJKfaL3kwH2qDRaQyMBPP84qJ9TU2b4WgJhRBmQbmJ3utCxXy-bhdSVsk59bax2tCM-O2E10qO1CvnuHzbzVLhBjZDF7p8cA-sZ0d6_znwQdDEXzGIgQImg7zvJRM0LkpplhrcF3Ruktdx66VQH1g0auIJRVgMs9DZhUvSEQhzlQl3hO-nK6PLiTURP6V2phdAGFAYSOA2OSTjUyn_8UC3hPhXHNAgXXzn7bFBCFkZIHbS3NhSFYuyn2P-NZiIEnc40cWief5GTQrHxxxjzJyssdYyZ2h9USUT2dyA";
-
     private static final AsyncHttpResponseHandler responseHandler = new DefaultResponseHandler();
 
     public static String getServerIP() {
@@ -72,7 +69,7 @@ public class ImageRestApi {
         params.put("album", album);
         params.put("resolution", pixelWidth);
         params.put("continue", continueToken);
-        Header[] headers = getHeaders(null, false);
+        Header[] headers = getHeaders(null);
         String endpoint = constructEndpoint(API_SERVER_IP, API_SERVER_IMAGES);
         client.get(null, endpoint, headers, params, handler);
     }
@@ -86,7 +83,7 @@ public class ImageRestApi {
         String keySuffix = imageKey.substring(imageKey.lastIndexOf("/") + 1);
         params.put("key", keySuffix); //TODO fix that
         Log.i(TAG, "getImage called " + keySuffix);
-        Header[] headers = getHeaders(null, false);
+        Header[] headers = getHeaders(null);
         String endpoint = constructEndpoint(API_SERVER_IP, API_SERVER_IMAGE);
         client.get(null, endpoint, headers, params, handler);
     }
@@ -94,12 +91,12 @@ public class ImageRestApi {
     public static void getServerState(AsyncHttpResponseHandler handler) {
         Log.i(TAG, "get server state called");
         RequestParams params = new RequestParams();
-        Header[] headers = getHeaders(null, false);
+        Header[] headers = getHeaders(null);
         String endpoint = API_GATEWAY.concat(API_LAMBDA_STATUS);
         client.get(null, endpoint, headers, params, handler);
     }
 
-    private static Header[] getHeaders(String contentType, boolean useStoredToken) {
+    private static Header[] getHeaders(String contentType) {
         Header[] headers;
         if (contentType != null) {
             headers = new Header[2];
@@ -107,18 +104,14 @@ public class ImageRestApi {
         } else {
             headers = new Header[1];
         }
-        if (useStoredToken) {
-            headers[0] = new BasicHeader("Authorization", token);
-        } else {
-            headers[0] = new BasicHeader("Authorization", AppHelper.getIdToken());
-        }
+        headers[0] = new BasicHeader("Authorization", AppHelper.getIdToken());
         return headers;
     }
 
     public static void postServerState(String action, AsyncHttpResponseHandler handler) throws JSONException, UnsupportedEncodingException {
         Log.i(TAG, "post server state called");
 
-        Header[] headers = getHeaders("application/json", false);
+        Header[] headers = getHeaders("application/json");
         String endpoint = API_GATEWAY.concat(API_LAMBDA_ACTION);
         JSONObject jsonobj = new JSONObject();
         jsonobj.put("action", action);
@@ -137,7 +130,7 @@ public class ImageRestApi {
         }
         Log.i(TAG, "postImages called");
 
-        Header[] headers = getHeaders("multipart/form-data; boundary=&&", true);
+        Header[] headers = getHeaders("multipart/form-data; boundary=&&");
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 
@@ -194,7 +187,7 @@ public class ImageRestApi {
         Log.i(TAG, "health check called");
 
         RequestParams params = new RequestParams();
-        Header[] headers = getHeaders(null, true);
+        Header[] headers = getHeaders(null);
         String endpoint = constructEndpoint(API_SERVER_IP, API_SERVER_HEALTH_CHECK);
         client.get(null, endpoint, headers, params, handler);
     }
