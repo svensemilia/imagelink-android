@@ -1,9 +1,13 @@
 package de.scit.imagelink.fragments;
 
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,24 +25,28 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import de.scit.imagelink.R;
 import de.scit.imagelink.common.ImageData;
+import de.scit.imagelink.common.Util;
 import de.scit.imagelink.rest.ImageRestApi;
 
-public class ImageFragment extends Fragment implements View.OnTouchListener {
+public class ImageFragment extends Fragment implements View.OnTouchListener, View.OnClickListener {
 
+    private ContentResolver contentResolver;
     private List<ImageData> images;
     private int imageIndex;
     private ImageView imgView;
 
     private static ImageFragment fragment;
 
-    public static ImageFragment getInstance(List<ImageData> images, int imageIndex) {
+    public static ImageFragment getInstance(ContentResolver contentResolver, List<ImageData> images, int imageIndex) {
         if (fragment == null) {
-            fragment = new ImageFragment(images, imageIndex);
+            fragment = new ImageFragment(contentResolver, images, imageIndex);
         }
         if (images.size() > fragment.getImages().size()) {
             fragment.addAdditionalImages(images);
@@ -52,9 +60,10 @@ public class ImageFragment extends Fragment implements View.OnTouchListener {
         fragment = null;
     }
 
-    private ImageFragment(List<ImageData> images, int imageIndex) {
+    private ImageFragment(ContentResolver contentResolver, List<ImageData> images, int imageIndex) {
         this.images = images;
         this.imageIndex = imageIndex;
+        this.contentResolver = contentResolver;
     }
 
     private List<ImageData> getImages() {
@@ -94,6 +103,7 @@ public class ImageFragment extends Fragment implements View.OnTouchListener {
         View layout =  inflater.inflate(R.layout.fragment_image, container, false);
         imgView = layout.findViewById(R.id.ogImage);
         View con = layout.findViewById(R.id.fragmentContainer);
+        layout.findViewById(R.id.saveButton).setOnClickListener(this);
         con.setOnTouchListener(this);
         displayImage();
         return layout;
@@ -128,5 +138,45 @@ public class ImageFragment extends Fragment implements View.OnTouchListener {
         Log.i("Fragment", "Motion: " + motionEvent.getRawX() + "; " + motionEvent.getRawY() +
                 MotionEvent.actionToString(motionEvent.getAction()));
         return false;
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.saveButton) {
+            try {
+                Log.i("Fragment", "Saving image");
+                saveImage();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void saveImage() throws IOException {
+        ImageData img = images.get(imageIndex);
+        Bitmap imgMap = Util.getImageBitmap(img.getOriginalBase64());
+
+        ContentValues values = getContentValues(img);
+        Uri url = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        OutputStream imageOut = contentResolver.openOutputStream(url);
+        try {
+            imgMap.compress(Bitmap.CompressFormat.JPEG, 100, imageOut);
+        } finally {
+            imageOut.close();
+        }
+        values.clear();
+        values.put(MediaStore.Images.Media.IS_PENDING, 0);
+        contentResolver.update(url, values, null, null);
+    }
+
+    private ContentValues getContentValues(ImageData img) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, Util.getFilenameFromKey(img.getKey()));
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, Util.getFilenameFromKey(img.getKey()));
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis());
+        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+        values.put(MediaStore.Images.Media.IS_PENDING, 1);
+        return values;
     }
 }

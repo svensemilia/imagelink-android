@@ -13,6 +13,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Environment;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -258,7 +259,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void startImageFragment(int imageIndex) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        ImageFragment frag = ImageFragment.getInstance(images, imageIndex);
+        //getContentResolver().ins
+        ImageFragment frag = ImageFragment.getInstance(getContentResolver(), images, imageIndex);
         transaction.add(R.id.mainWindow, frag);
         transaction.addToBackStack(null);
         transaction.commit();

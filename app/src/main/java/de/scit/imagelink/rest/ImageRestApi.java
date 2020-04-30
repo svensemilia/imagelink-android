@@ -29,6 +29,7 @@ import cz.msebera.android.httpclient.protocol.HTTP;
 import de.scit.imagelink.cognito.AppHelper;
 import de.scit.imagelink.common.DefaultResponseHandler;
 import de.scit.imagelink.common.Preferences;
+import de.scit.imagelink.common.Util;
 
 public class ImageRestApi {
     private static AsyncHttpClient client = new AsyncHttpClient();
@@ -80,9 +81,7 @@ public class ImageRestApi {
         }
 
         RequestParams params = new RequestParams();
-        String keySuffix = imageKey.substring(imageKey.lastIndexOf("/") + 1);
-        params.put("key", keySuffix); //TODO fix that
-        Log.i(TAG, "getImage called " + keySuffix);
+        params.put("key", Util.getFilenameFromKey(imageKey)); //TODO fix that
         Header[] headers = getHeaders(null);
         String endpoint = constructEndpoint(API_SERVER_IP, API_SERVER_IMAGE);
         client.get(null, endpoint, headers, params, handler);
